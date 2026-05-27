@@ -1,0 +1,14 @@
+name = "platform-status-monitor-worker"
+main = "src/index.ts"
+compatibility_date = "2026-05-13"
+
+kv_namespaces = [
+  { binding = "PSM_STATE", id = "replace-with-kv-namespace-id" }
+]
+
+[triggers]
+crons = ["*/5 * * * *", "17 3 * * *"]
+
+[vars]
+INSTALL_CONFIG_PATH = "config/install.example.json"
+
