@@ -1,0 +1,25 @@
+{
+  "name": "platform-status-monitor",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Agent-configurable platform status monitoring for teams and client operators.",
+  "license": "MIT",
+  "packageManager": "pnpm@11.1.2",
+  "scripts": {
+    "build": "turbo run build",
+    "check": "turbo run check",
+    "dev": "turbo run dev --parallel",
+    "format": "prettier --check .",
+    "format:write": "prettier --write .",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "validate:config": "pnpm --filter @platform-status-monitor/shared validate:config"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "prettier": "^3.7.4",
+    "turbo": "^2.9.15",
+    "typescript": "^6.0.3"
+  }
+}
+

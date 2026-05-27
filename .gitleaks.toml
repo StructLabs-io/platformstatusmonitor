@@ -1,0 +1,10 @@
+title = "Platform Status Monitor gitleaks config"
+
+[allowlist]
+description = "Allow documented placeholder values"
+regexes = [
+  '''TELEGRAM_BOT_TOKEN''',
+  '''WEBHOOK_SECRET_NAME''',
+  '''your-placeholder-value'''
+]
+
