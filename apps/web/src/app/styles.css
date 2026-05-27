@@ -222,7 +222,7 @@ h3 {
 }
 
 .platform-grid {
-  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
 }
 
 .platform-card {
