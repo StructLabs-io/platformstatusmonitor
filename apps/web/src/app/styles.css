@@ -1,0 +1,162 @@
+:root {
+  color-scheme: light;
+  --bg: #f5f7fa;
+  --ink: #17202a;
+  --muted: #5b6776;
+  --line: #d8e0e8;
+  --panel: #ffffff;
+  --nav: #101820;
+  --nav-text: #dce7f3;
+  --accent: #0f766e;
+  --warn: #a16207;
+  --bad: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+  color: var(--ink);
+  background: var(--bg);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+aside {
+  background: var(--nav);
+  color: white;
+  padding: 24px;
+}
+
+aside h1 {
+  margin: 0;
+  font-size: 20px;
+  line-height: 1.25;
+}
+
+nav {
+  display: grid;
+  gap: 6px;
+  margin-top: 26px;
+}
+
+nav a {
+  color: var(--nav-text);
+  padding: 9px 0;
+  text-decoration: none;
+}
+
+main {
+  padding: 32px;
+}
+
+h2 {
+  margin: 0 0 20px;
+  font-size: 26px;
+}
+
+h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+.metric {
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.ok {
+  color: var(--accent);
+}
+
+.warn {
+  color: var(--warn);
+}
+
+.bad {
+  color: var(--bad);
+}
+
+.stack {
+  display: grid;
+  gap: 16px;
+}
+
+.empty {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  padding: 18px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+th,
+td {
+  border-bottom: 1px solid var(--line);
+  padding: 11px 12px;
+  text-align: left;
+  vertical-align: top;
+}
+
+th {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+}
+
+pre {
+  overflow: auto;
+  background: #15202b;
+  color: #e8f1f7;
+  border-radius: 8px;
+  padding: 14px;
+}
+
+@media (max-width: 760px) {
+  body {
+    grid-template-columns: 1fr;
+  }
+
+  aside {
+    padding: 18px 20px;
+  }
+
+  nav {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  main {
+    padding: 22px 18px;
+  }
+}
+
