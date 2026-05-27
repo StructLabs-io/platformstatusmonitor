@@ -1,5 +1,5 @@
 import { validateInstallConfig } from "@platform-status-monitor/shared";
-import installConfig from "../../../config/install.example.json";
+import installConfig from "../../../config/install.json";
 import { getJson, type Env } from "./state/kv-state";
 
 function json(data: unknown, init: ResponseInit = {}): Response {

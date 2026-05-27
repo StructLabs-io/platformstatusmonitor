@@ -1,6 +1,7 @@
 # Configuration
 
-Platform Status Monitor uses bundled JSON configuration for the MVP.
+Platform Status Monitor uses bundled JSON configuration for the MVP. The Worker
+imports `config/install.json` at build time.
 
 The public repo includes example config only. Private installs should keep their
 non-secret config in a private fork or private deployment repo.
@@ -19,4 +20,3 @@ Validation catches:
 - unknown platform references
 - unknown service references
 - schema errors
-

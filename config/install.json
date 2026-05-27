@@ -1,0 +1,55 @@
+{
+  "name": "Example Platform Status Monitor Install",
+  "timezone": "America/New_York",
+  "platforms": {
+    "airtable": {
+      "displayName": "Airtable",
+      "statusPageUrl": "https://status.airtable.com",
+      "ingestion": ["rss", "webhook"],
+      "services": {
+        "interfaces": {"displayName": "Interfaces"},
+        "automations": {"displayName": "Automations"},
+        "api": {"displayName": "API"}
+      },
+      "zones": ["global", "us", "eu"]
+    }
+  },
+  "dependents": {
+    "example-client": {
+      "type": "client",
+      "displayName": "Example Client",
+      "timezone": "America/New_York",
+      "activeHours": {"start": "09:00", "end": "18:00"},
+      "dependencies": [
+        {
+          "platform": "airtable",
+          "services": ["interfaces", "automations"],
+          "zones": ["us", "global"],
+          "criticality": "high",
+          "environment": "production"
+        }
+      ]
+    }
+  },
+  "venues": {
+    "webapp": {
+      "type": "webapp",
+      "displayName": "Webapp Only"
+    }
+  },
+  "routingRules": [
+    {
+      "id": "show-major-incidents",
+      "match": {
+        "severities": ["critical", "major"]
+      },
+      "actions": [
+        {"venue": "webapp"}
+      ],
+      "options": {
+        "respectActiveHours": false,
+        "notifyOnResolved": true
+      }
+    }
+  ]
+}
