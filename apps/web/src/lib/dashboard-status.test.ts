@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Incident, InstallConfig, RoutingDecision } from "@platform-status-monitor/shared";
-import { buildPlatformHealth, formatIncidentScope } from "./dashboard-status";
+import { buildPlatformHealth, buildPlatformTiers, formatIncidentScope } from "./dashboard-status";
 
 const config: InstallConfig = {
   name: "Test",
@@ -74,5 +74,29 @@ describe("buildPlatformHealth", () => {
 
   it("formats services and zones without long incident text", () => {
     expect(formatIncidentScope(config, incident)).toBe("Interfaces / us");
+  });
+
+  it("groups platforms by configured tiers", () => {
+    const health = buildPlatformHealth(
+      {
+        ...config,
+        dashboard: {
+          tiers: [
+            { id: "core", displayName: "Core", platforms: ["make"] },
+            { id: "client", displayName: "Client", platforms: ["airtable"] },
+            { id: "supporting", displayName: "Supporting", platforms: [] }
+          ]
+        }
+      },
+      [incident],
+      []
+    );
+
+    const tiers = buildPlatformTiers({ ...config, dashboard: { tiers: [{ id: "core", displayName: "Core", platforms: ["make"] }] } }, health);
+
+    expect(tiers[0].displayName).toBe("Core");
+    expect(tiers[0].platforms.map((platform) => platform.id)).toEqual(["make"]);
+    expect(tiers[1].displayName).toBe("Uncategorized");
+    expect(tiers[1].platforms.map((platform) => platform.id)).toEqual(["airtable"]);
   });
 });

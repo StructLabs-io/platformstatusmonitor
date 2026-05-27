@@ -8,6 +8,25 @@ non-secret config in a private fork or private deployment repo.
 
 Secrets are referenced by name and stored outside git.
 
+## Dashboard Tiers
+
+Platform cards can be grouped from JSON with `dashboard.tiers`.
+
+```json
+{
+  "dashboard": {
+    "tiers": [
+      {"id": "tier-1", "displayName": "Tier 1", "platforms": ["airtable"]},
+      {"id": "tier-2", "displayName": "Tier 2", "platforms": []},
+      {"id": "tier-3", "displayName": "Tier 3", "platforms": []}
+    ]
+  }
+}
+```
+
+If tiers are omitted, the dashboard falls back to three tiers using the platform
+order from `platforms`.
+
 ## Validate Config
 
 ```bash

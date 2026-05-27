@@ -3,13 +3,16 @@
 import { useEffect, useState } from "react";
 import type { Incident, InstallConfig, RoutingDecision } from "@platform-status-monitor/shared";
 import { getConfig, getRecentDecisions, getRecentIncidents, getValidation, type ValidationResult } from "../lib/api";
-import { buildPlatformHealth, formatIncidentScope, type PlatformHealth } from "../lib/dashboard-status";
+import { buildPlatformHealth, buildPlatformTiers, formatIncidentScope, type PlatformHealth, type PlatformTier } from "../lib/dashboard-status";
+
+type LoadState = "loading" | "ready" | "degraded";
 
 export default function DashboardPage() {
   const [validation, setValidation] = useState<ValidationResult>({ valid: false, issues: ["Loading"] });
   const [config, setConfig] = useState<InstallConfig | null>(null);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [decisions, setDecisions] = useState<RoutingDecision[]>([]);
+  const [loadState, setLoadState] = useState<LoadState>("loading");
 
   useEffect(() => {
     void Promise.all([getValidation(), getConfig(), getRecentIncidents(), getRecentDecisions()]).then(([nextValidation, nextConfig, nextIncidents, nextDecisions]) => {
@@ -17,10 +20,12 @@ export default function DashboardPage() {
       setConfig(nextConfig);
       setIncidents(nextIncidents);
       setDecisions(nextDecisions);
+      setLoadState(nextConfig && nextValidation.valid ? "ready" : "degraded");
     });
   }, []);
 
   const platformHealth = config ? buildPlatformHealth(config, incidents, decisions) : [];
+  const platformTiers = config ? buildPlatformTiers(config, platformHealth) : [];
   const impactedPlatforms = platformHealth.filter((platform) => platform.incident && platform.impactedDependents.length > 0);
 
   return (
@@ -43,19 +48,30 @@ export default function DashboardPage() {
           <p className="muted">Visible and suppressed</p>
         </section>
       </div>
+      <HealthNotice loadState={loadState} validation={validation} />
       <ImpactBanner platforms={impactedPlatforms} />
       <section className="dashboard-section">
         <div className="section-heading">
           <h3>Monitored Platforms</h3>
-          <p className="muted">Ordered from JSON config</p>
+          <p className="muted">Grouped by dashboard tiers</p>
         </div>
-        <div className="platform-grid">
-          {platformHealth.map((platform) => (
-            <PlatformCard config={config} key={platform.id} platform={platform} />
-          ))}
-        </div>
+        {loadState === "loading" ? <PlatformSkeleton /> : <TieredPlatformGrid config={config} tiers={platformTiers} />}
       </section>
     </>
+  );
+}
+
+function HealthNotice({ loadState, validation }: { loadState: LoadState; validation: ValidationResult }) {
+  if (loadState === "loading") {
+    return <section className="notice">Loading platform status from the Worker.</section>;
+  }
+
+  if (loadState !== "degraded" && validation.valid) return null;
+
+  return (
+    <section className="notice bad-notice">
+      Status data is degraded. {validation.issues.length > 0 ? validation.issues.join(" ") : "The Worker or bundled config is unavailable."}
+    </section>
   );
 }
 
@@ -70,6 +86,42 @@ function ImpactBanner({ platforms }: { platforms: PlatformHealth[] }) {
         </p>
       ))}
     </section>
+  );
+}
+
+function PlatformSkeleton() {
+  return (
+    <div className="platform-grid">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div aria-hidden="true" className="platform-card skeleton-card" key={index}>
+          <span />
+          <span />
+          <span />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function TieredPlatformGrid({ config, tiers }: { config: InstallConfig | null; tiers: PlatformTier[] }) {
+  return (
+    <div className="tier-stack">
+      {tiers
+        .filter((tier) => tier.platforms.length > 0)
+        .map((tier) => (
+          <section className="tier-section" key={tier.id}>
+            <div className="tier-heading">
+              <h4>{tier.displayName}</h4>
+              {tier.description ? <p className="muted">{tier.description}</p> : null}
+            </div>
+            <div className="platform-grid">
+              {tier.platforms.map((platform) => (
+                <PlatformCard config={config} key={platform.id} platform={platform} />
+              ))}
+            </div>
+          </section>
+        ))}
+    </div>
   );
 }
 

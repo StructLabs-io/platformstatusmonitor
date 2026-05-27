@@ -1,3 +1,4 @@
+import { NavLinks } from "../components/nav-links";
 import type { Metadata } from "next";
 import { ThemeToggle } from "../components/theme-toggle";
 import "./styles.css";
@@ -25,13 +26,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <h1>Platform Status Monitor</h1>
             <ThemeToggle />
           </div>
-          <nav>
-            {navItems.map((item) => (
-              <a href={item.href} key={item.href}>
-                {item.label}
-              </a>
-            ))}
-          </nav>
+          <NavLinks items={navItems} />
         </aside>
         <main>{children}</main>
       </body>

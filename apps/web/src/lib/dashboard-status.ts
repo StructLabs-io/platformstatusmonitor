@@ -11,6 +11,13 @@ export interface PlatformHealth {
   impactedDependents: string[];
 }
 
+export interface PlatformTier {
+  id: string;
+  displayName: string;
+  description: string | null;
+  platforms: PlatformHealth[];
+}
+
 const severityRank: Record<Incident["severity"], number> = {
   critical: 5,
   major: 4,
@@ -80,6 +87,47 @@ export function buildPlatformHealth(config: InstallConfig, incidents: Incident[]
       impactedDependents
     };
   });
+}
+
+function fallbackTierNames(): string[] {
+  return ["Tier 1", "Tier 2", "Tier 3"];
+}
+
+export function buildPlatformTiers(config: InstallConfig, health: PlatformHealth[]): PlatformTier[] {
+  const byId = new Map(health.map((platform) => [platform.id, platform]));
+  const configuredTiers = config.dashboard?.tiers ?? [];
+
+  if (configuredTiers.length > 0) {
+    const used = new Set<string>();
+    const tiers = configuredTiers.map((tier) => {
+      const platforms = tier.platforms.flatMap((platformId) => {
+        const platform = byId.get(platformId);
+        if (!platform) return [];
+        used.add(platformId);
+        return [platform];
+      });
+
+      return {
+        id: tier.id,
+        displayName: tier.displayName,
+        description: tier.description ?? null,
+        platforms
+      };
+    });
+    const remaining = health.filter((platform) => !used.has(platform.id));
+    return remaining.length > 0
+      ? [...tiers, { id: "uncategorized", displayName: "Uncategorized", description: "Configured platforms not assigned to a tier.", platforms: remaining }]
+      : tiers;
+  }
+
+  const names = fallbackTierNames();
+  const tierSize = Math.ceil(health.length / names.length);
+  return names.map((displayName, index) => ({
+    id: `tier-${index + 1}`,
+    displayName,
+    description: null,
+    platforms: health.slice(index * tierSize, (index + 1) * tierSize)
+  }));
 }
 
 export function formatIncidentScope(config: InstallConfig, incident: Incident): string {

@@ -67,9 +67,23 @@ export const routingRuleSchema = z.object({
     .default({})
 });
 
+export const dashboardTierSchema = z.object({
+  id: z.string().min(1),
+  displayName: z.string().min(1),
+  description: z.string().optional(),
+  platforms: z.array(z.string().min(1)).default([])
+});
+
+export const dashboardSchema = z
+  .object({
+    tiers: z.array(dashboardTierSchema).default([])
+  })
+  .default({ tiers: [] });
+
 export const installConfigSchema = z.object({
   name: z.string().min(1),
   timezone: z.string().optional(),
+  dashboard: dashboardSchema.optional(),
   platforms: z.record(z.string(), platformSchema),
   dependents: z.record(z.string(), dependentSchema),
   venues: z.record(z.string(), venueSchema),
@@ -77,4 +91,3 @@ export const installConfigSchema = z.object({
 });
 
 export type InstallConfig = z.infer<typeof installConfigSchema>;
-

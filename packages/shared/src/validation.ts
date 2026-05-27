@@ -17,6 +17,14 @@ export function validateInstallConfig(input: unknown): string[] {
     });
   });
 
+  config.dashboard?.tiers.forEach((tier, tierIndex) => {
+    tier.platforms.forEach((platformId, platformIndex) => {
+      if (!config.platforms[platformId]) {
+        issues.push(`dashboard.tiers[${tierIndex}].platforms[${platformIndex}] references unknown platform: ${platformId}`);
+      }
+    });
+  });
+
   Object.entries(config.dependents).forEach(([dependentId, dependent]) => {
     dependent.dependencies.forEach((dependency, dependencyIndex) => {
       const platform = config.platforms[dependency.platform];
@@ -44,4 +52,3 @@ export function assertValidInstallConfig(input: unknown): InstallConfig {
   }
   return parsed;
 }
-

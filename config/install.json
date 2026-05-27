@@ -1,6 +1,28 @@
 {
   "name": "Example Platform Status Monitor Install",
   "timezone": "America/New_York",
+  "dashboard": {
+    "tiers": [
+      {
+        "id": "tier-1",
+        "displayName": "Tier 1",
+        "description": "Most critical platforms for the install.",
+        "platforms": ["airtable"]
+      },
+      {
+        "id": "tier-2",
+        "displayName": "Tier 2",
+        "description": "Important platforms with operational workarounds.",
+        "platforms": []
+      },
+      {
+        "id": "tier-3",
+        "displayName": "Tier 3",
+        "description": "Supporting platforms monitored for visibility.",
+        "platforms": []
+      }
+    ]
+  },
   "platforms": {
     "airtable": {
       "displayName": "Airtable",

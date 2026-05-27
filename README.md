@@ -27,6 +27,7 @@ status providers
 ## Local Development
 
 Read [Prerequisites](docs/prerequisites.md) before setup.
+Project and design context live in [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md).
 
 ```bash
 pnpm install
