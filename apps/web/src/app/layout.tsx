@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ThemeToggle } from "../components/theme-toggle";
 import "./styles.css";
 
 export const metadata: Metadata = {
@@ -20,7 +21,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en">
       <body>
         <aside>
-          <h1>Platform Status Monitor</h1>
+          <div className="brand-row">
+            <h1>Platform Status Monitor</h1>
+            <ThemeToggle />
+          </div>
           <nav>
             {navItems.map((item) => (
               <a href={item.href} key={item.href}>
@@ -34,4 +38,3 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
-
