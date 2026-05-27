@@ -1,3 +1,5 @@
+import { validateInstallConfig } from "@platform-status-monitor/shared";
+import installConfig from "../../../config/install.example.json";
 import { getJson, type Env } from "./state/kv-state";
 
 function json(data: unknown, init: ResponseInit = {}): Response {
@@ -30,8 +32,13 @@ async function handleFetch(request: Request, env: Env): Promise<Response> {
   }
 
   if (url.pathname === "/api/validation") {
-    const validation = await getJson(env.PSM_STATE, "validation:latest", { valid: false, issues: ["validation has not run"] });
+    const latest = await getJson(env.PSM_STATE, "validation:latest", null);
+    const validation = latest ?? validateBundledConfig();
     return json(validation);
+  }
+
+  if (url.pathname === "/api/config") {
+    return json(installConfig);
   }
 
   return json({ error: "not found" }, { status: 404 });
@@ -40,9 +47,17 @@ async function handleFetch(request: Request, env: Env): Promise<Response> {
 export default {
   fetch: handleFetch,
   async scheduled(_event: ScheduledEvent, env: Env): Promise<void> {
-    await env.PSM_STATE.put("validation:latest", JSON.stringify({ valid: true, issues: [], checkedAt: new Date().toISOString() }));
+    await env.PSM_STATE.put("validation:latest", JSON.stringify(validateBundledConfig()));
   }
 };
 
 export type { Env };
 
+function validateBundledConfig() {
+  const issues = validateInstallConfig(installConfig);
+  return {
+    valid: issues.length === 0,
+    issues,
+    checkedAt: new Date().toISOString()
+  };
+}

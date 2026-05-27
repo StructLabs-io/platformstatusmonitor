@@ -1,4 +1,3 @@
-import { readFileSync } from "node:fs";
 import { installConfigSchema, type InstallConfig } from "./config-schema";
 
 export function validateInstallConfig(input: unknown): string[] {
@@ -44,16 +43,5 @@ export function assertValidInstallConfig(input: unknown): InstallConfig {
     throw new Error(issues.join("\n"));
   }
   return parsed;
-}
-
-if (import.meta.url === `file://${process.argv[1]}`) {
-  const filePath = process.argv[2];
-  const json = JSON.parse(readFileSync(filePath, "utf8"));
-  const issues = validateInstallConfig(json);
-  if (issues.length > 0) {
-    console.error(issues.join("\n"));
-    process.exit(1);
-  }
-  console.log(`Config valid: ${filePath}`);
 }
 
