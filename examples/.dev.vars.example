@@ -1,0 +1,5 @@
+PSM_WEBHOOK_SECRET=replace-with-local-webhook-secret
+TELEGRAM_BOT_TOKEN=replace-with-token-after-telegram-is-enabled
+TELEGRAM_CHAT_ID=replace-with-chat-id-after-telegram-is-enabled
+TELEGRAM_TOPIC_ID=replace-with-topic-id-after-telegram-is-enabled
+
