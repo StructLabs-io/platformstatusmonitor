@@ -26,6 +26,8 @@ status providers
 
 ## Local Development
 
+Read [Prerequisites](docs/prerequisites.md) before setup.
+
 ```bash
 pnpm install
 pnpm check
@@ -50,3 +52,9 @@ pnpm --filter @platform-status-monitor/web dev
 Never commit real tokens or webhook secrets. Use `.dev.vars` locally and
 Cloudflare secrets in deployed environments.
 
+## Deployment And CI
+
+- Cloudflare setup is documented in [Cloudflare Deployment](docs/cloudflare-deployment.md).
+- GitHub Actions are disabled in the public template by default. Use
+  [GitHub Actions Setup](docs/github-actions.md) to enable CI in your own
+  install.

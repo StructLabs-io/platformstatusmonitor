@@ -7,12 +7,27 @@ function json(data: unknown, init: ResponseInit = {}): Response {
     ...init,
     headers: {
       "content-type": "application/json; charset=utf-8",
+      "access-control-allow-origin": "*",
+      "access-control-allow-methods": "GET, OPTIONS",
+      "access-control-allow-headers": "content-type",
       ...init.headers
     }
   });
 }
 
 async function handleFetch(request: Request, env: Env): Promise<Response> {
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "access-control-allow-origin": "*",
+        "access-control-allow-methods": "GET, OPTIONS",
+        "access-control-allow-headers": "content-type",
+        "access-control-max-age": "86400"
+      }
+    });
+  }
+
   const url = new URL(request.url);
 
   if (url.pathname === "/health") {
