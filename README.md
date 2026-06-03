@@ -6,6 +6,29 @@ operators.
 The MVP uses bundled JSON configuration, a Cloudflare Worker for ingestion/API,
 Workers KV for runtime state, and a read-only Next.js dashboard.
 
+[![PSM dashboard — click to see a live install](docs/screenshots/01-dashboard.png)](https://psm.structlabs.io/)
+
+<br/>
+
+<details>
+<summary><b>More screenshots</b> — Incidents, Routes, Platforms, Venues, Agent Setup</summary>
+
+<br/>
+
+<table>
+<tr>
+  <td align="center"><a href="docs/screenshots/02-incidents.png"><img src="docs/screenshots/02-incidents.png" width="280" alt="Incidents"/></a><br/><sub>Incidents</sub></td>
+  <td align="center"><a href="docs/screenshots/03-routes.png"><img src="docs/screenshots/03-routes.png" width="280" alt="Routes"/></a><br/><sub>Routes</sub></td>
+  <td align="center"><a href="docs/screenshots/04-platforms.png"><img src="docs/screenshots/04-platforms.png" width="280" alt="Platforms"/></a><br/><sub>Platforms</sub></td>
+</tr>
+<tr>
+  <td align="center"><a href="docs/screenshots/05-venues.png"><img src="docs/screenshots/05-venues.png" width="280" alt="Venues"/></a><br/><sub>Venues</sub></td>
+  <td align="center"><a href="docs/screenshots/06-agent-setup.png"><img src="docs/screenshots/06-agent-setup.png" width="280" alt="Agent Setup"/></a><br/><sub>Agent Setup</sub></td>
+</tr>
+</table>
+
+</details>
+
 ## Status
 
 The core MVP is complete.
