@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Incident, InstallConfig, RoutingDecision } from "@platform-status-monitor/shared";
-import { buildPlatformHealth, buildPlatformTiers, formatIncidentScope } from "./dashboard-status";
+import { buildPlatformHealth, buildPlatformTiers, formatIncidentScope, formatImpactLine, getOwnedEntityName } from "./dashboard-status";
 
 const config: InstallConfig = {
   name: "Test",
@@ -50,6 +50,72 @@ const incident: Incident = {
   sourceUrl: "https://status.airtable.com/incidents/1",
   raw: {}
 };
+
+describe("getOwnedEntityName", () => {
+  it("returns the displayName of the internal-system dependent", () => {
+    const cfg = {
+      ...config,
+      dependents: {
+        ...config.dependents,
+        structlabs: {
+          type: "internal-system" as const,
+          displayName: "StructLabs.io",
+          timezone: "Asia/Kuala_Lumpur",
+          dependencies: []
+        }
+      }
+    };
+    expect(getOwnedEntityName(cfg)).toBe("StructLabs.io");
+  });
+
+  it("returns null when no internal-system dependent exists", () => {
+    expect(getOwnedEntityName(config)).toBeNull();
+  });
+});
+
+describe("formatImpactLine", () => {
+  const owned = "StructLabs.io";
+
+  it("names owned + count when owned and multiple clients affected", () => {
+    expect(formatImpactLine("Cloudflare", [owned, "ANI", "OV", "HH", "UWDS"], owned))
+      .toBe("Cloudflare is impacting StructLabs.io and 4 clients.");
+  });
+
+  it("names owned + 2 clients", () => {
+    expect(formatImpactLine("Cloudflare", [owned, "ANI", "OV"], owned))
+      .toBe("Cloudflare is impacting StructLabs.io and 2 clients.");
+  });
+
+  it("names owned + 1 client (singular)", () => {
+    expect(formatImpactLine("Cloudflare", [owned, "ANI"], owned))
+      .toBe("Cloudflare is impacting StructLabs.io and 1 client.");
+  });
+
+  it("names owned only — omits client count when no other clients", () => {
+    expect(formatImpactLine("Cloudflare", [owned], owned))
+      .toBe("Cloudflare is impacting StructLabs.io.");
+  });
+
+  it("uses client count when owned is not affected, multiple clients", () => {
+    expect(formatImpactLine("Cloudflare", ["ANI", "OV", "HH"], owned))
+      .toBe("Cloudflare is impacting 3 clients.");
+  });
+
+  it("uses singular client when owned not affected and only 1 client", () => {
+    expect(formatImpactLine("Cloudflare", ["ANI"], owned))
+      .toBe("Cloudflare is impacting 1 client.");
+  });
+
+  it("behaves correctly when no owned entity configured (null)", () => {
+    expect(formatImpactLine("Cloudflare", ["ANI", "OV"], null))
+      .toBe("Cloudflare is impacting 2 clients.");
+  });
+
+  it("behaves correctly when owned not configured and only 1 dependent", () => {
+    expect(formatImpactLine("Cloudflare", ["ANI"], null))
+      .toBe("Cloudflare is impacting 1 client.");
+  });
+});
 
 describe("buildPlatformHealth", () => {
   it("keeps platform order and marks active incident platforms", () => {

@@ -145,3 +145,45 @@ export function formatIncidentScope(config: InstallConfig, incident: Incident): 
   const zones = incident.zones.filter((zone) => zone !== "global");
   return [...services, ...zones].join(" / ");
 }
+
+/**
+ * Returns the display name of the owned (internal-system) entity from config, if any.
+ * This is the entity named explicitly in the impact line; all other impacted dependents
+ * are collapsed to a count to avoid leaking client names.
+ */
+export function getOwnedEntityName(config: InstallConfig): string | null {
+  const owned = Object.values(config.dependents).find((d) => d.type === "internal-system");
+  return owned?.displayName ?? null;
+}
+
+/**
+ * Formats the impact line for a platform.
+ *
+ * Rules:
+ * - If the owned entity is affected, name it first, then "and N client(s)" for the rest.
+ *   If N === 0, omit the "and N clients" suffix.
+ * - If the owned entity is NOT affected, just "N client(s)" (no name).
+ * - Singular: "1 client", plural: "N clients".
+ *
+ * Examples (owned = "StructLabs.io"):
+ *   ["StructLabs.io", "ANI", "OV", "HH", "UWDS"] → "StructLabs.io and 4 clients"
+ *   ["StructLabs.io", "ANI", "OV"]                → "StructLabs.io and 2 clients"
+ *   ["StructLabs.io", "ANI"]                       → "StructLabs.io and 1 client"
+ *   ["StructLabs.io"]                              → "StructLabs.io"
+ *   ["ANI", "OV", "HH"]                            → "3 clients"
+ *   ["ANI"]                                        → "1 client"
+ */
+export function formatImpactLine(platformName: string, impactedDependents: string[], ownedEntityName: string | null): string {
+  const ownedAffected = ownedEntityName !== null && impactedDependents.includes(ownedEntityName);
+  const clientCount = ownedAffected ? impactedDependents.length - 1 : impactedDependents.length;
+  const clientLabel = clientCount === 1 ? "1 client" : `${clientCount} clients`;
+
+  let impactPhrase: string;
+  if (ownedAffected) {
+    impactPhrase = clientCount > 0 ? `${ownedEntityName} and ${clientLabel}` : ownedEntityName;
+  } else {
+    impactPhrase = clientLabel;
+  }
+
+  return `${platformName} is impacting ${impactPhrase}.`;
+}

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Link as LinkIcon } from "lucide-react";
 import type { Incident, InstallConfig, RoutingDecision } from "@platform-status-monitor/shared";
 import { getConfig, getRecentDecisions, getRecentIncidents, getValidation, type ValidationResult } from "../lib/api";
-import { buildPlatformHealth, buildPlatformTiers, formatIncidentScope, type PlatformHealth, type PlatformTier } from "../lib/dashboard-status";
+import { buildPlatformHealth, buildPlatformTiers, formatIncidentScope, formatImpactLine, getOwnedEntityName, type PlatformHealth, type PlatformTier } from "../lib/dashboard-status";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
 import { Card, CardFooter } from "../components/ui/card";
@@ -37,7 +37,7 @@ export default function DashboardPage() {
     <>
       <h2>Dashboard</h2>
       <HealthNotice loadState={loadState} validation={validation} />
-      <ImpactBanner platforms={impactedPlatforms} />
+      <ImpactBanner config={config} platforms={impactedPlatforms} />
       <section className="dashboard-section">
         <div className="section-heading">
           <h3>Monitored Platforms</h3>
@@ -71,8 +71,9 @@ function HealthNotice({ loadState, validation }: { loadState: LoadState; validat
   );
 }
 
-function ImpactBanner({ platforms }: { platforms: PlatformHealth[] }) {
+function ImpactBanner({ config, platforms }: { config: InstallConfig | null; platforms: PlatformHealth[] }) {
   if (platforms.length === 0) return null;
+  const ownedEntityName = config ? getOwnedEntityName(config) : null;
 
   return (
     <Alert className="impact-banner">
@@ -80,7 +81,7 @@ function ImpactBanner({ platforms }: { platforms: PlatformHealth[] }) {
       <div className="impact-copy">
         {platforms.map((platform) => (
           <p key={platform.id}>
-            <strong>{platform.displayName}</strong> is impacting {platform.impactedDependents.join(", ")}.
+            {formatImpactLine(platform.displayName, platform.impactedDependents, ownedEntityName)}
           </p>
         ))}
       </div>
