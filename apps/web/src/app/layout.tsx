@@ -1,5 +1,6 @@
 import { NavLinks } from "../components/nav-links";
 import type { Metadata } from "next";
+import { SidebarFooter } from "../components/sidebar-footer";
 import { ThemeToggle } from "../components/theme-toggle";
 import "./styles.css";
 
@@ -22,12 +23,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <aside>
+        <aside className="app-sidebar">
           <div className="brand-row">
             <h1>Platform Status Monitor</h1>
             <ThemeToggle />
           </div>
           <NavLinks items={navItems} />
+          <SidebarFooter />
         </aside>
         <main>{children}</main>
       </body>

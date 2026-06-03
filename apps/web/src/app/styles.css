@@ -396,6 +396,65 @@ nav {
   margin-left: auto;
 }
 
+/* ── App sidebar bottom (GitHub badge + version stamp) ───────────────────── */
+.app-sidebar {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-sidebar-bottom {
+  margin-top: auto;
+  padding: 14px 10px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.app-sidebar-github {
+  align-items: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--foreground);
+  display: inline-flex;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  gap: 8px;
+  line-height: 14px;
+  padding: 6px 12px;
+  text-decoration: none;
+  transition:
+    background 100ms var(--ease),
+    color 100ms var(--ease),
+    border-color 100ms var(--ease);
+  width: fit-content;
+}
+
+.app-sidebar-github:hover {
+  background: var(--muted-surface);
+  border-color: var(--line-2);
+  color: var(--foreground);
+}
+
+.app-sidebar-version {
+  color: var(--muted-foreground);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.02em;
+  line-height: 14px;
+  opacity: 0.7;
+  padding: 0 4px;
+}
+
+@media (max-width: 720px) {
+  .app-sidebar-bottom {
+    display: none;
+  }
+}
+
 .footer-dot {
   background: var(--ok-edge);
   border-radius: 999px;
