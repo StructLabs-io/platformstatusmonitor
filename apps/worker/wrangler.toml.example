@@ -7,8 +7,9 @@ kv_namespaces = [
 ]
 
 [triggers]
-crons = ["*/5 * * * *", "17 3 * * *"]
+crons = ["*/5 * * * *"]
 
 [vars]
 INSTALL_CONFIG_PATH = "config/install.example.json"
-
+PSM_ALLOWED_ORIGINS = "http://localhost:3000"
+PSM_PUBLIC_READS = "false"

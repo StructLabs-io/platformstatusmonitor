@@ -9,7 +9,8 @@
     "check": "tsc -p tsconfig.json --noEmit",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
-    "validate:config": "tsx src/validation-cli.ts ../../config/install.json"
+    "validate:config": "tsx src/validation-cli.ts ../../config/install.json",
+    "export:schema": "tsx src/schema-export-cli.ts ../../config/install.schema.json"
   },
   "dependencies": {
     "zod": "^4.4.3"

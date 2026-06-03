@@ -14,6 +14,7 @@ const navItems = [
   { href: "/platforms", label: "Platforms" },
   { href: "/dependents", label: "Dependents" },
   { href: "/routes", label: "Routes" },
+  { href: "/venues", label: "Venues" },
   { href: "/setup", label: "Agent Setup" }
 ];
 

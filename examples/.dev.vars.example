@@ -1,5 +1,8 @@
+PSM_READ_TOKEN=replace-with-local-read-token
+PSM_ADMIN_TOKEN=replace-with-local-admin-token
+PSM_ALLOWED_ORIGINS=http://localhost:3000
+PSM_PUBLIC_READS=false
 PSM_WEBHOOK_SECRET=replace-with-local-webhook-secret
 TELEGRAM_BOT_TOKEN=replace-with-token-after-telegram-is-enabled
 TELEGRAM_CHAT_ID=replace-with-chat-id-after-telegram-is-enabled
 TELEGRAM_TOPIC_ID=replace-with-topic-id-after-telegram-is-enabled
-

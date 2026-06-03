@@ -68,5 +68,73 @@ describe("routeIncident", () => {
     expect(decision.decision).toBe("suppress_irrelevant");
     expect(decision.venues).toEqual([]);
   });
-});
 
+  it("does not treat global dependencies as matching regional incidents", () => {
+    const decision = routeIncident(config, {
+      ...incident,
+      zones: ["br"]
+    });
+
+    expect(decision.decision).toBe("suppress_irrelevant");
+  });
+
+  it("treats provider-global incidents as matching regional dependencies", () => {
+    const decision = routeIncident(config, {
+      ...incident,
+      zones: ["global"]
+    });
+
+    expect(decision.decision).toBe("visible");
+  });
+
+  it("suppresses active-hour-aware rules outside dependent hours", () => {
+    const quietConfig: InstallConfig = {
+      ...config,
+      venues: {
+        ...config.venues,
+        telegram: {
+          type: "telegram",
+          displayName: "Telegram",
+          botTokenSecret: "TELEGRAM_BOT_TOKEN",
+          chatIdEnv: "TELEGRAM_CHAT_ID"
+        }
+      },
+      routingRules: [
+        {
+          id: "minor-active-hours",
+          match: { severities: ["minor"] },
+          actions: [{ venue: "telegram" }],
+          options: { respectActiveHours: true, bypassQuietHours: false, notifyOnResolved: true }
+        }
+      ]
+    };
+    const decision = routeIncident(
+      quietConfig,
+      { ...incident, severity: "minor" },
+      { now: new Date("2026-05-27T03:00:00Z") }
+    );
+
+    expect(decision.decision).toBe("suppress_quiet_hours");
+  });
+
+  it("keeps webapp visibility outside active hours", () => {
+    const decision = routeIncident(
+      {
+        ...config,
+        routingRules: [
+          {
+            id: "minor-active-hours",
+            match: { severities: ["minor"] },
+            actions: [{ venue: "webapp" }],
+            options: { respectActiveHours: true, bypassQuietHours: false, notifyOnResolved: true }
+          }
+        ]
+      },
+      { ...incident, severity: "minor" },
+      { now: new Date("2026-05-27T03:00:00Z") }
+    );
+
+    expect(decision.decision).toBe("visible");
+    expect(decision.venues).toEqual(["webapp"]);
+  });
+});

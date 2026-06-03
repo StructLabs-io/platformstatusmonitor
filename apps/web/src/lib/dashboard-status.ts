@@ -44,13 +44,18 @@ function overlaps(left: string[], right: string[]): boolean {
   return left.includes("global") || right.includes("global") || left.some((value) => right.includes(value));
 }
 
+function zonesOverlap(dependencyZones: string[], incidentZones: string[]): boolean {
+  if (incidentZones.includes("global")) return true;
+  return dependencyZones.some((zone) => zone !== "global" && incidentZones.includes(zone));
+}
+
 function inferImpactedDependents(config: InstallConfig, incident: Incident): string[] {
   return Object.values(config.dependents)
     .filter((dependent) =>
       dependent.dependencies.some((dependency) => {
         if (dependency.platform !== incident.platform) return false;
         if (dependency.services.length > 0 && incident.services.length > 0 && !overlaps(dependency.services, incident.services)) return false;
-        if (dependency.zones.length > 0 && incident.zones.length > 0 && !overlaps(dependency.zones, incident.zones)) return false;
+        if (dependency.zones.length > 0 && incident.zones.length > 0 && !zonesOverlap(dependency.zones, incident.zones)) return false;
         return true;
       })
     )
@@ -69,11 +74,15 @@ function decisionImpacts(config: InstallConfig, decisions: RoutingDecision[], in
 
 export function buildPlatformHealth(config: InstallConfig, incidents: Incident[], decisions: RoutingDecision[]): PlatformHealth[] {
   const activeIncidents = incidents.filter(isActiveIncident);
+  const hasDecisions = decisions.length > 0;
+  const relevantIncidentIds = new Set(
+    decisions.filter((decision) => decision.decision === "visible" || decision.decision === "notify").map((decision) => decision.incidentId)
+  );
 
   return Object.entries(config.platforms).map(([id, platform]) => {
     const incident =
       activeIncidents
-        .filter((item) => item.platform === id)
+        .filter((item) => item.platform === id && (!hasDecisions || relevantIncidentIds.has(item.id)))
         .sort((left, right) => incidentSortValue(right) - incidentSortValue(left))[0] ?? null;
     const decisionDependents = incident ? decisionImpacts(config, decisions, incident.id) : [];
     const impactedDependents = incident ? (decisionDependents.length > 0 ? decisionDependents : inferImpactedDependents(config, incident)) : [];

@@ -13,6 +13,7 @@
     "format:write": "prettier --write .",
     "lint": "turbo run lint",
     "test": "turbo run test",
+    "export:schema": "pnpm --filter @platform-status-monitor/shared export:schema",
     "validate:config": "pnpm --filter @platform-status-monitor/shared validate:config"
   },
   "devDependencies": {
@@ -20,6 +21,11 @@
     "prettier": "^3.7.4",
     "turbo": "^2.9.15",
     "typescript": "^6.0.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "postcss": "8.5.15",
+      "next@16.2.6>postcss": "8.5.15"
+    }
   }
 }
-

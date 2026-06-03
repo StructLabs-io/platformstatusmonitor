@@ -1,0 +1,72 @@
+{
+  "name": "Small Team Example",
+  "timezone": "America/New_York",
+  "dashboard": {
+    "tiers": [
+      {
+        "id": "tier-1",
+        "displayName": "Critical",
+        "platforms": ["airtable"]
+      },
+      {
+        "id": "tier-2",
+        "displayName": "Supporting",
+        "platforms": []
+      },
+      {
+        "id": "tier-3",
+        "displayName": "Watchlist",
+        "platforms": []
+      }
+    ]
+  },
+  "platforms": {
+    "airtable": {
+      "displayName": "Airtable",
+      "statusPageUrl": "https://status.airtable.com",
+      "providerType": "statuspage",
+      "ingestion": ["rss", "webhook"],
+      "services": {
+        "api": { "displayName": "API" },
+        "interfaces": { "displayName": "Interfaces" }
+      },
+      "zones": ["global", "us", "eu"]
+    }
+  },
+  "dependents": {
+    "ops-team": {
+      "type": "team",
+      "displayName": "Ops Team",
+      "timezone": "America/New_York",
+      "activeHours": { "start": "09:00", "end": "18:00" },
+      "dependencies": [
+        {
+          "platform": "airtable",
+          "services": ["api", "interfaces"],
+          "zones": ["global", "us"],
+          "criticality": "high",
+          "environment": "production"
+        }
+      ]
+    }
+  },
+  "venues": {
+    "webapp": {
+      "type": "webapp",
+      "displayName": "Webapp"
+    }
+  },
+  "routingRules": [
+    {
+      "id": "show-prod-incidents",
+      "match": {
+        "severities": ["critical", "major", "minor"]
+      },
+      "actions": [{ "venue": "webapp" }],
+      "options": {
+        "respectActiveHours": true,
+        "notifyOnResolved": true
+      }
+    }
+  ]
+}

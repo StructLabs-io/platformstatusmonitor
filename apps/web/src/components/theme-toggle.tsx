@@ -1,6 +1,8 @@
 "use client";
 
+import { Moon, Sun } from "lucide-react";
 import { useEffect, useState } from "react";
+import { Button } from "./ui/button";
 
 type Theme = "light" | "dark";
 
@@ -8,7 +10,9 @@ function getInitialTheme(): Theme {
   if (typeof window === "undefined") return "light";
   const savedTheme = window.localStorage.getItem("psm-theme");
   if (savedTheme === "dark" || savedTheme === "light") return savedTheme;
-  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  return window.matchMedia("(prefers-color-scheme: dark)").matches
+    ? "dark"
+    : "light";
 }
 
 export function ThemeToggle() {
@@ -28,8 +32,20 @@ export function ThemeToggle() {
   }
 
   return (
-    <button aria-label="Toggle dark mode" className="theme-toggle" onClick={toggleTheme} type="button">
+    <Button
+      aria-label="Toggle dark mode"
+      className="theme-toggle"
+      onClick={toggleTheme}
+      size="sm"
+      type="button"
+      variant="ghost"
+    >
+      {theme === "dark" ? (
+        <Sun aria-hidden="true" size={14} strokeWidth={1.75} />
+      ) : (
+        <Moon aria-hidden="true" size={14} strokeWidth={1.75} />
+      )}
       <span aria-hidden="true">{theme === "dark" ? "Light" : "Dark"}</span>
-    </button>
+    </Button>
   );
 }

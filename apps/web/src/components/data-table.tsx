@@ -1,4 +1,12 @@
 import type { ReactNode } from "react";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "./ui/table";
 
 interface DataTableProps<T> {
   columns: Array<{ key: string; label: string; render: (row: T) => ReactNode }>;
@@ -12,24 +20,25 @@ export function DataTable<T>({ columns, empty, rows }: DataTableProps<T>) {
   }
 
   return (
-    <table>
-      <thead>
-        <tr>
-          {columns.map((column) => (
-            <th key={column.key}>{column.label}</th>
-          ))}
-        </tr>
-      </thead>
-      <tbody>
-        {rows.map((row, index) => (
-          <tr key={index}>
+    <div className="table-wrap">
+      <Table>
+        <TableHeader>
+          <TableRow>
             {columns.map((column) => (
-              <td key={column.key}>{column.render(row)}</td>
+              <TableHead key={column.key}>{column.label}</TableHead>
             ))}
-          </tr>
-        ))}
-      </tbody>
-    </table>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {rows.map((row, index) => (
+            <TableRow key={index}>
+              {columns.map((column) => (
+                <TableCell key={column.key}>{column.render(row)}</TableCell>
+              ))}
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </div>
   );
 }
-

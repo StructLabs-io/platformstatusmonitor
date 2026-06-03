@@ -42,3 +42,62 @@ pnpm --dir apps/worker exec wrangler pages deploy apps/web/out --project-name pl
 ## Secrets
 
 Use Cloudflare secrets for private tokens.
+
+```bash
+printf "%s" "replace-with-read-token" | pnpm --dir apps/worker exec wrangler secret put PSM_READ_TOKEN
+printf "%s" "replace-with-admin-token" | pnpm --dir apps/worker exec wrangler secret put PSM_ADMIN_TOKEN
+printf "%s" "replace-with-token" | pnpm --dir apps/worker exec wrangler secret put TELEGRAM_BOT_TOKEN
+printf "%s" "replace-with-chat-id" | pnpm --dir apps/worker exec wrangler secret put TELEGRAM_CHAT_ID
+printf "%s" "replace-with-webhook-url" | pnpm --dir apps/worker exec wrangler secret put SLACK_WEBHOOK_URL
+```
+
+The read token protects full Worker read APIs such as `/api/config`,
+`/api/decisions/recent`, `/api/ingestion/providers`, and
+`/api/deliveries/recent`. The admin token protects `/api/admin/refresh` and
+`/api/admin/test-notification`.
+
+Keep `/health` public. The only unauthenticated dashboard data endpoint is
+`/api/public/dashboard`, which intentionally omits dependents, routing rules,
+venue secret references, delivery logs, and raw provider payloads.
+
+Restrict browser access with `PSM_ALLOWED_ORIGINS`:
+
+```toml
+[vars]
+PSM_ALLOWED_ORIGINS = "https://status.example.com"
+PSM_PUBLIC_READS = "false"
+```
+
+If you build a static Pages app that calls private Worker APIs directly, set
+`NEXT_PUBLIC_READ_TOKEN` only behind Cloudflare Access or another private
+front-door. Otherwise, use the redacted public dashboard endpoint.
+
+## Cloudflare Access
+
+For private installs, put the Pages domain behind Cloudflare Access:
+
+1. Create a Zero Trust application for the Pages custom domain.
+2. Add an allow policy for the team members or identity groups that can view the
+   dashboard.
+3. Leave the Worker API public only if the dashboard must call it directly from
+   the browser. For stricter installs, route API calls through the same protected
+   domain and apply Access there too.
+4. Keep provider webhook endpoints separate from protected human dashboard
+   routes if external providers need to call them.
+
+## Release Checklist
+
+Before release:
+
+- Run `pnpm check`, `pnpm test`, `pnpm validate:config`, and `pnpm build`.
+- Run `pnpm export:schema` after schema changes.
+- Confirm public repos contain placeholders only.
+- Confirm private install config contains no token values, chat IDs, or webhook
+  URLs.
+- Confirm `PSM_ALLOWED_ORIGINS` does not use `*`.
+- Confirm full read APIs return `401` without `PSM_READ_TOKEN`.
+- Deploy the Worker, trigger `/api/admin/refresh`, and confirm
+  `/api/ingestion/latest`.
+- Build Pages with `NEXT_PUBLIC_WORKER_BASE_URL` set to the deployed Worker.
+- Smoke-test dashboard, incidents, platforms, routes, dependents, venues, and
+  agent setup pages.

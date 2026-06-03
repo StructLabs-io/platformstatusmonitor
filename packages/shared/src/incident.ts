@@ -19,6 +19,11 @@ export interface Incident {
   updatedAt: string;
   resolvedAt: string | null;
   sourceUrl: string;
+  fingerprint?: string;
+  firstSeenAt?: string;
+  lastSeenAt?: string;
+  lastChangedAt?: string;
+  providerStatus?: "active" | "resolved" | "unknown";
   raw: unknown;
 }
 
@@ -31,4 +36,3 @@ export interface RoutingDecision {
   reason: string[];
   createdAt: string;
 }
-

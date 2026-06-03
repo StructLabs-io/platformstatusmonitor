@@ -1,6 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Badge } from "../../components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/ui/card";
 import { getValidation, type ValidationResult } from "../../lib/api";
 
 export default function SetupPage() {
@@ -14,26 +22,37 @@ export default function SetupPage() {
     <>
       <h2>Agent Setup</h2>
       <div className="stack">
-        <section className="panel">
-          <h3>Validation</h3>
-          <p className={validation.valid ? "ok" : "bad"}>{validation.valid ? "Config valid" : "Config needs attention"}</p>
-          <ul>
-            {validation.issues.map((issue) => (
-              <li key={issue}>{issue}</li>
-            ))}
-          </ul>
-        </section>
-        <section className="panel">
-          <h3>Agent Prompt</h3>
+        <Card className="panel">
+          <CardHeader>
+            <CardTitle>Validation</CardTitle>
+            <CardDescription>
+              <Badge variant={validation.valid ? "secondary" : "destructive"}>
+                {validation.valid ? "Config valid" : "Config needs attention"}
+              </Badge>
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <ul>
+              {validation.issues.map((issue) => (
+                <li key={issue}>{issue}</li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+        <Card className="panel">
+          <CardHeader>
+            <CardTitle>Agent Prompt</CardTitle>
+          </CardHeader>
+          <CardContent>
           <pre>{`Configure Platform Status Monitor for my install.
 Edit bundled JSON config only.
 Do not add real secrets.
 Use placeholder secret names.
 Run pnpm validate:config.
 Explain every routing rule you add.`}</pre>
-        </section>
+          </CardContent>
+        </Card>
       </div>
     </>
   );
 }
-

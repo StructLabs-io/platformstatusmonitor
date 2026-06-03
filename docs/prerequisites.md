@@ -23,6 +23,7 @@ Run the baseline checks:
 pnpm check
 pnpm test
 pnpm validate:config
+pnpm export:schema
 pnpm build
 ```
 
@@ -73,3 +74,9 @@ Before asking an agent to deploy or modify an install, make sure it can:
 - Access Wrangler authentication through `wrangler login` or environment vars
 - See the target Cloudflare account ID
 - Avoid printing or committing secret values
+
+## Font Decision
+
+The public app uses system UI fonts by default so installs do not depend on a
+third-party font host. Private installs may add a branded or self-hosted font in
+their fork.

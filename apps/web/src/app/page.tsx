@@ -1,9 +1,14 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Link as LinkIcon } from "lucide-react";
 import type { Incident, InstallConfig, RoutingDecision } from "@platform-status-monitor/shared";
 import { getConfig, getRecentDecisions, getRecentIncidents, getValidation, type ValidationResult } from "../lib/api";
 import { buildPlatformHealth, buildPlatformTiers, formatIncidentScope, type PlatformHealth, type PlatformTier } from "../lib/dashboard-status";
+import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
+import { Badge } from "../components/ui/badge";
+import { Card, CardFooter } from "../components/ui/card";
+import { Skeleton } from "../components/ui/skeleton";
 
 type LoadState = "loading" | "ready" | "degraded";
 
@@ -31,23 +36,6 @@ export default function DashboardPage() {
   return (
     <>
       <h2>Dashboard</h2>
-      <div className="metric-grid">
-        <section className="panel">
-          <h3>Config</h3>
-          <div className={validation.valid ? "metric ok" : "metric bad"}>{validation.valid ? "Valid" : "Review"}</div>
-          <p className="muted">{validation.issues.length} issue(s)</p>
-        </section>
-        <section className="panel">
-          <h3>Recent Incidents</h3>
-          <div className="metric">{incidents.length}</div>
-          <p className="muted">KV recent index</p>
-        </section>
-        <section className="panel">
-          <h3>Recent Decisions</h3>
-          <div className="metric">{decisions.length}</div>
-          <p className="muted">Visible and suppressed</p>
-        </section>
-      </div>
       <HealthNotice loadState={loadState} validation={validation} />
       <ImpactBanner platforms={impactedPlatforms} />
       <section className="dashboard-section">
@@ -63,15 +51,23 @@ export default function DashboardPage() {
 
 function HealthNotice({ loadState, validation }: { loadState: LoadState; validation: ValidationResult }) {
   if (loadState === "loading") {
-    return <section className="notice">Loading platform status from the Worker.</section>;
+    return (
+      <Alert className="notice">
+        <AlertTitle>Loading</AlertTitle>
+        <AlertDescription>Loading platform status from the Worker.</AlertDescription>
+      </Alert>
+    );
   }
 
   if (loadState !== "degraded" && validation.valid) return null;
 
   return (
-    <section className="notice bad-notice">
-      Status data is degraded. {validation.issues.length > 0 ? validation.issues.join(" ") : "The Worker or bundled config is unavailable."}
-    </section>
+    <Alert className="notice bad-notice" variant="destructive">
+      <AlertTitle>Status data is degraded</AlertTitle>
+      <AlertDescription>
+        {validation.issues.length > 0 ? validation.issues.join(" ") : "The Worker or bundled config is unavailable."}
+      </AlertDescription>
+    </Alert>
   );
 }
 
@@ -79,13 +75,16 @@ function ImpactBanner({ platforms }: { platforms: PlatformHealth[] }) {
   if (platforms.length === 0) return null;
 
   return (
-    <section className="impact-banner">
-      {platforms.map((platform) => (
-        <p key={platform.id}>
-          <strong>{platform.displayName}</strong> is impacting {platform.impactedDependents.join(", ")}.
-        </p>
-      ))}
-    </section>
+    <Alert className="impact-banner">
+      <Badge className="banner-label" variant="outline">Impact</Badge>
+      <div className="impact-copy">
+        {platforms.map((platform) => (
+          <p key={platform.id}>
+            <strong>{platform.displayName}</strong> is impacting {platform.impactedDependents.join(", ")}.
+          </p>
+        ))}
+      </div>
+    </Alert>
   );
 }
 
@@ -93,11 +92,11 @@ function PlatformSkeleton() {
   return (
     <div className="platform-grid">
       {Array.from({ length: 6 }).map((_, index) => (
-        <div aria-hidden="true" className="platform-card skeleton-card" key={index}>
-          <span />
-          <span />
-          <span />
-        </div>
+        <Card aria-hidden="true" className="platform-card skeleton-card" key={index}>
+          <Skeleton />
+          <Skeleton />
+          <Skeleton />
+        </Card>
       ))}
     </div>
   );
@@ -129,23 +128,77 @@ function PlatformCard({ config, platform }: { config: InstallConfig | null; plat
   const incident = platform.incident;
   const href = incident?.sourceUrl || platform.statusPageUrl || "#";
   const label = incident ? formatIncidentScope(config as InstallConfig, incident) || incident.status : "Operational";
+  const host = getHost(incident?.sourceUrl || platform.statusPageUrl);
+  const iconUrl = getPlatformIconUrl(platform);
 
   return (
-    <article className={`platform-card ${platform.level}`}>
+    <Card className={`platform-card ${platform.level}`}>
       <a className="platform-card-main" href={href} rel="noreferrer" target={href.startsWith("http") ? "_blank" : undefined}>
-        <span aria-hidden="true" className={`status-dot ${platform.level}`} />
+        <span aria-hidden="true" className="platform-logo">
+          <img alt="" loading="lazy" src={iconUrl} />
+        </span>
         <span>
           <span className="platform-title">{platform.displayName}</span>
           <span className="platform-state">{label}</span>
+          {incident ? <span className="platform-scope">{incident.title}</span> : null}
         </span>
+        <span aria-label={`${platform.displayName} ${platform.level}`} className={`status-dot ${platform.level}`} role="img" />
       </a>
       {platform.statusPageUrl ? (
-        <a className="status-link" href={platform.statusPageUrl} rel="noreferrer" target="_blank">
-          Status page
-        </a>
+        <CardFooter className="platform-card-footer">
+          <a className="status-link" href={platform.statusPageUrl} rel="noreferrer" target="_blank">
+            <LinkIcon aria-hidden="true" className="status-link-icon" />
+            {host}
+          </a>
+        </CardFooter>
       ) : (
-        <span className="status-link unavailable">No status page</span>
+        <CardFooter className="platform-card-footer">
+          <span className="status-link unavailable">No status page</span>
+        </CardFooter>
       )}
-    </article>
+    </Card>
   );
 }
+
+function getHost(url?: string | null) {
+  if (!url) return "status page";
+  try {
+    return new URL(url).host.replace(/^www\./, "");
+  } catch {
+    return "status page";
+  }
+}
+
+function getPlatformIconUrl(platform: PlatformHealth): string {
+  const domain = platformIconDomains[platform.id] ?? getHost(platform.statusPageUrl);
+  return `https://www.google.com/s2/favicons?domain=${encodeURIComponent(domain)}&sz=64`;
+}
+
+const platformIconDomains: Record<string, string> = {
+  airtable: "airtable.com",
+  anthropic: "anthropic.com",
+  clickup: "clickup.com",
+  digitalocean: "digitalocean.com",
+  docusign: "docusign.com",
+  fathom: "fathom.video",
+  github: "github.com",
+  glide: "glideapps.com",
+  "google-cloud": "cloud.google.com",
+  "google-gemini": "gemini.google.com",
+  "google-workspace": "workspace.google.com",
+  lob: "lob.com",
+  make: "make.com",
+  openai: "openai.com",
+  openrouter: "openrouter.ai",
+  pdfco: "pdf.co",
+  perplexity: "perplexity.ai",
+  quickbooks: "quickbooks.intuit.com",
+  "quickbooks-dev": "developer.intuit.com",
+  slack: "slack.com",
+  stacker: "stackerhq.com",
+  stripe: "stripe.com",
+  supabase: "supabase.com",
+  toggl: "toggl.com",
+  "wispr-flow": "wisprflow.ai",
+  xero: "xero.com",
+};
