@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Incident, InstallConfig, RoutingDecision } from "@platform-status-monitor/shared";
-import { buildPlatformHealth, buildPlatformTiers, formatIncidentScope, formatImpactLine, getOwnedEntityName } from "./dashboard-status";
+import { buildOwnedPropertiesSection, buildPlatformHealth, buildPlatformTiers, formatIncidentScope, formatImpactLine, getOwnedEntityName } from "./dashboard-status";
 
 const config: InstallConfig = {
   name: "Test",
@@ -164,5 +164,49 @@ describe("buildPlatformHealth", () => {
     expect(tiers[0].platforms.map((platform) => platform.id)).toEqual(["make"]);
     expect(tiers[1].displayName).toBe("Uncategorized");
     expect(tiers[1].platforms.map((platform) => platform.id)).toEqual(["airtable"]);
+  });
+});
+
+describe("buildOwnedPropertiesSection", () => {
+  const configWithTier0: InstallConfig = {
+    ...config,
+    platforms: {
+      ...config.platforms,
+      "my-site": {
+        displayName: "My Site",
+        ingestion: ["synthetic"] as ["synthetic"],
+        services: {},
+        zones: ["global"]
+      }
+    },
+    dashboard: {
+      tiers: [
+        { id: "tier-0", displayName: "Owned Properties", platforms: ["my-site"] },
+        { id: "tier-1", displayName: "Tier 1", platforms: ["airtable", "make"] }
+      ]
+    }
+  };
+
+  it("returns owned platforms from tier-0", () => {
+    const health = buildPlatformHealth(configWithTier0, [], []);
+    const section = buildOwnedPropertiesSection(configWithTier0, health);
+    expect(section.platforms.map((p) => p.id)).toEqual(["my-site"]);
+    expect(section.tiers).toHaveLength(1);
+  });
+
+  it("returns empty when no tier-0 exists", () => {
+    const health = buildPlatformHealth(config, [], []);
+    const section = buildOwnedPropertiesSection(config, health);
+    expect(section.platforms).toHaveLength(0);
+    expect(section.tiers).toHaveLength(0);
+  });
+
+  it("buildPlatformTiers excludes tier-0 platforms", () => {
+    const health = buildPlatformHealth(configWithTier0, [], []);
+    const tiers = buildPlatformTiers(configWithTier0, health);
+    const allIds = tiers.flatMap((t) => t.platforms.map((p) => p.id));
+    expect(allIds).not.toContain("my-site");
+    expect(allIds).toContain("airtable");
+    expect(allIds).toContain("make");
   });
 });

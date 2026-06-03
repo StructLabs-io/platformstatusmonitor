@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Link as LinkIcon } from "lucide-react";
 import type { Incident, InstallConfig, RoutingDecision } from "@platform-status-monitor/shared";
 import { getConfig, getRecentDecisions, getRecentIncidents, getValidation, type ValidationResult } from "../lib/api";
-import { buildPlatformHealth, buildPlatformTiers, formatIncidentScope, formatImpactLine, getOwnedEntityName, type PlatformHealth, type PlatformTier } from "../lib/dashboard-status";
+import { buildOwnedPropertiesSection, buildPlatformHealth, buildPlatformTiers, formatIncidentScope, formatImpactLine, getOwnedEntityName, type OwnedPropertiesSection, type PlatformHealth, type PlatformTier } from "../lib/dashboard-status";
 import { Alert, AlertDescription, AlertTitle } from "../components/ui/alert";
 import { Badge } from "../components/ui/badge";
 import { Card, CardFooter } from "../components/ui/card";
@@ -31,6 +31,7 @@ export default function DashboardPage() {
 
   const platformHealth = config ? buildPlatformHealth(config, incidents, decisions) : [];
   const platformTiers = config ? buildPlatformTiers(config, platformHealth) : [];
+  const ownedSection = config ? buildOwnedPropertiesSection(config, platformHealth) : { platforms: [], tiers: [] };
   const impactedPlatforms = platformHealth.filter((platform) => platform.incident && platform.impactedDependents.length > 0);
 
   return (
@@ -38,6 +39,15 @@ export default function DashboardPage() {
       <h2>Dashboard</h2>
       <HealthNotice loadState={loadState} validation={validation} />
       <ImpactBanner config={config} platforms={impactedPlatforms} />
+      {ownedSection.platforms.length > 0 && (
+        <section className="dashboard-section">
+          <div className="section-heading">
+            <h3>Owned Properties</h3>
+            <p className="muted">Sites and applications you own and operate</p>
+          </div>
+          {loadState === "loading" ? <PlatformSkeleton /> : <OwnedPropertiesGrid config={config} section={ownedSection} />}
+        </section>
+      )}
       <section className="dashboard-section">
         <div className="section-heading">
           <h3>Monitored Platforms</h3>
@@ -99,6 +109,42 @@ function PlatformSkeleton() {
           <Skeleton />
         </Card>
       ))}
+    </div>
+  );
+}
+
+/**
+ * Renders owned properties.
+ * Flat (no tier sub-headers) when there is exactly one tier group;
+ * tiered (with sub-headers) when multiple groups are present.
+ */
+function OwnedPropertiesGrid({ config, section }: { config: InstallConfig | null; section: OwnedPropertiesSection }) {
+  if (section.tiers.length <= 1) {
+    return (
+      <div className="platform-grid">
+        {section.platforms.map((platform) => (
+          <PlatformCard config={config} key={platform.id} platform={platform} />
+        ))}
+      </div>
+    );
+  }
+  return (
+    <div className="tier-stack">
+      {section.tiers
+        .filter((tier) => tier.platforms.length > 0)
+        .map((tier) => (
+          <section className="tier-section" key={tier.id}>
+            <div className="tier-heading">
+              <h4>{tier.displayName}</h4>
+              {tier.description ? <p className="muted">{tier.description}</p> : null}
+            </div>
+            <div className="platform-grid">
+              {tier.platforms.map((platform) => (
+                <PlatformCard config={config} key={platform.id} platform={platform} />
+              ))}
+            </div>
+          </section>
+        ))}
     </div>
   );
 }

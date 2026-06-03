@@ -102,13 +102,65 @@ function fallbackTierNames(): string[] {
   return ["Tier 1", "Tier 2", "Tier 3"];
 }
 
+/**
+ * The "Owned Properties" section data returned by buildOwnedPropertiesSection.
+ * `tiers` will be empty when no tier-0 is configured.
+ * When there is exactly one tier-0 group, callers should render it flat (no tier sub-headers).
+ * When there are multiple groups, callers may render tier sub-headers for each.
+ */
+export interface OwnedPropertiesSection {
+  platforms: PlatformHealth[];
+  tiers: PlatformTier[];
+}
+
+/**
+ * Returns the Owned Properties section — platforms assigned to any tier whose ID
+ * starts with "tier-0". Returns empty arrays if no tier-0 is configured.
+ * Used to render Owned Properties as a top-level section above Monitored Platforms.
+ */
+export function buildOwnedPropertiesSection(config: InstallConfig, health: PlatformHealth[]): OwnedPropertiesSection {
+  const byId = new Map(health.map((platform) => [platform.id, platform]));
+  const ownedTierConfigs = (config.dashboard?.tiers ?? []).filter((t) => t.id === "tier-0" || t.id.startsWith("tier-0-"));
+
+  if (ownedTierConfigs.length === 0) {
+    return { platforms: [], tiers: [] };
+  }
+
+  const tiers: PlatformTier[] = ownedTierConfigs.map((tier) => ({
+    id: tier.id,
+    displayName: tier.displayName,
+    description: tier.description ?? null,
+    platforms: tier.platforms.flatMap((platformId) => {
+      const platform = byId.get(platformId);
+      return platform ? [platform] : [];
+    })
+  }));
+
+  const platforms = tiers.flatMap((t) => t.platforms);
+  return { platforms, tiers };
+}
+
+/**
+ * Builds monitored-platform tiers, excluding any platforms already claimed by the
+ * Owned Properties section (tier-0 / tier-0-*).
+ */
 export function buildPlatformTiers(config: InstallConfig, health: PlatformHealth[]): PlatformTier[] {
   const byId = new Map(health.map((platform) => [platform.id, platform]));
   const configuredTiers = config.dashboard?.tiers ?? [];
 
   if (configuredTiers.length > 0) {
     const used = new Set<string>();
-    const tiers = configuredTiers.map((tier) => {
+    // Collect all platform IDs belonging to owned-properties tiers so they are
+    // excluded from the Monitored Platforms section.
+    const ownedPlatformIds = new Set(
+      configuredTiers
+        .filter((t) => t.id === "tier-0" || t.id.startsWith("tier-0-"))
+        .flatMap((t) => t.platforms)
+    );
+    const monitoredTierConfigs = configuredTiers.filter(
+      (t) => t.id !== "tier-0" && !t.id.startsWith("tier-0-")
+    );
+    const tiers = monitoredTierConfigs.map((tier) => {
       const platforms = tier.platforms.flatMap((platformId) => {
         const platform = byId.get(platformId);
         if (!platform) return [];
@@ -123,7 +175,8 @@ export function buildPlatformTiers(config: InstallConfig, health: PlatformHealth
         platforms
       };
     });
-    const remaining = health.filter((platform) => !used.has(platform.id));
+    // Remaining = configured but not placed in any monitored tier, and not owned
+    const remaining = health.filter((platform) => !used.has(platform.id) && !ownedPlatformIds.has(platform.id));
     return remaining.length > 0
       ? [...tiers, { id: "uncategorized", displayName: "Uncategorized", description: "Configured platforms not assigned to a tier.", platforms: remaining }]
       : tiers;
