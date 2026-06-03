@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+### Added
+
+- **Build identity vars in example config** (`apps/worker/wrangler.toml.example`):
+  `PSM_VERSION`, `PSM_BUILD_NUMBER`, and `PSM_GIT_SHA` vars added to the
+  example config. Exposed via `/api/health` and the dashboard footer. Set these
+  at deploy time with your deploy script or CI environment.
+
 ### Fixed
 
 - **KV write cascade eliminated** (`apps/worker/src/index.ts`): Removed the
@@ -23,6 +30,14 @@
   (daily 03:17 UTC) schedule was a no-op duplicate of the `*/5 * * * *`
   five-minute cron. One extra invocation per day, zero extra behavior. Removed.
   Only `*/5 * * * *` remains.
+
+### Changed
+
+- **`PSM_PUBLIC_READS` default flipped to `true` in example config**
+  (`apps/worker/wrangler.toml.example`): The example now defaults to
+  `PSM_PUBLIC_READS = "true"`. Real access control is handled by
+  `PSM_ALLOWED_ORIGINS`. Private installs should set `PSM_PUBLIC_READS =
+  "false"` in their own `wrangler.toml`.
 
 ### Architecture note
 

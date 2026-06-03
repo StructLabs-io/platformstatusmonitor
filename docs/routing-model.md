@@ -9,7 +9,7 @@ MVP decisions:
 - `suppress_duplicate`: same lifecycle state already processed
 - `suppress_quiet_hours`: non-urgent and outside allowed hours
 
-External notification decisions are modeled but not enabled in the MVP.
+External notification venues (Telegram, Slack) are implemented. They are inactive until a venue is configured in `install.json` and the matching secrets are provisioned.
 
 Routes evaluate:
 

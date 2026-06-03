@@ -48,6 +48,7 @@ printf "%s" "replace-with-read-token" | pnpm --dir apps/worker exec wrangler sec
 printf "%s" "replace-with-admin-token" | pnpm --dir apps/worker exec wrangler secret put PSM_ADMIN_TOKEN
 printf "%s" "replace-with-token" | pnpm --dir apps/worker exec wrangler secret put TELEGRAM_BOT_TOKEN
 printf "%s" "replace-with-chat-id" | pnpm --dir apps/worker exec wrangler secret put TELEGRAM_CHAT_ID
+printf "%s" "replace-with-topic-id" | pnpm --dir apps/worker exec wrangler secret put TELEGRAM_TOPIC_ID
 printf "%s" "replace-with-webhook-url" | pnpm --dir apps/worker exec wrangler secret put SLACK_WEBHOOK_URL
 ```
 

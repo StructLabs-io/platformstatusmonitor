@@ -8,12 +8,12 @@ Workers KV for runtime state, and a read-only Next.js dashboard.
 
 ## Status
 
-This project is in early MVP development.
+The core MVP is complete.
 
 - Read-only webapp
 - JSON-first config
-- Webapp-only routing decisions
-- Telegram planned after the dashboard is fully functional
+- Routing decisions for webapp and external venues
+- Telegram and Slack delivery implemented (configure via `install.json` and Cloudflare secrets)
 
 ## Architecture
 
