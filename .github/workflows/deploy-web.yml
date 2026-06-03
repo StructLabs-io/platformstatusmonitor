@@ -1,0 +1,56 @@
+name: Deploy web to Cloudflare Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'packages/**'
+      - 'pnpm-lock.yaml'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-web-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history so `git rev-list --count HEAD` is correct
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Compute build identity
+        id: build_id
+        run: |
+          echo "build_number=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
+          echo "git_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Build web
+        run: pnpm --filter @platform-status-monitor/web build
+        env:
+          NEXT_PUBLIC_BUILD_NUMBER: ${{ steps.build_id.outputs.build_number }}
+          NEXT_PUBLIC_GIT_SHA: ${{ steps.build_id.outputs.git_sha }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy apps/web/out --project-name=n9c-platformstatusmonitor --branch=main
