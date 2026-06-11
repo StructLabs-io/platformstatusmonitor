@@ -453,6 +453,78 @@
         ],
         "additionalProperties": false
       }
+    },
+    "notificationFilters": {
+      "default": {
+        "severityFloor": [
+          "critical",
+          "major"
+        ],
+        "perPlatform": {}
+      },
+      "type": "object",
+      "properties": {
+        "severityFloor": {
+          "default": [
+            "critical",
+            "major"
+          ],
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "critical",
+              "major"
+            ]
+          }
+        },
+        "perPlatform": {
+          "default": {},
+          "type": "object",
+          "propertyNames": {
+            "type": "string"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "properties": {
+              "enabled": {
+                "default": true,
+                "type": "boolean"
+              },
+              "componentAllowlist": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "componentDenylist": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "regionAllowlist": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              }
+            },
+            "required": [
+              "enabled"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "severityFloor",
+        "perPlatform"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

@@ -117,6 +117,32 @@ export const dashboardSchema = z
   })
   .default({ tiers: [] });
 
+// ─── Notification filters ─────────────────────────────────────────────────────
+// Gates which incidents reach Telegram. Dashboard surfaces everything regardless.
+// Pass-through default: a platform absent from `perPlatform` behaves as
+// `{ enabled: true }` with no allowlists/denylists. The severity floor still
+// applies to every platform.
+
+export const notificationFiltersSeverityFloorSchema = z.enum(["critical", "major"]);
+
+export const notificationFiltersPlatformSchema = z.object({
+  enabled: z.boolean().default(true),
+  componentAllowlist: z.array(z.string().min(1)).optional(),
+  componentDenylist: z.array(z.string().min(1)).optional(),
+  regionAllowlist: z.array(z.string().min(1)).optional()
+});
+
+export const notificationFiltersSchema = z
+  .object({
+    severityFloor: z
+      .array(notificationFiltersSeverityFloorSchema)
+      .default(["critical", "major"]),
+    perPlatform: z
+      .record(z.string(), notificationFiltersPlatformSchema)
+      .default({})
+  })
+  .default({ severityFloor: ["critical", "major"], perPlatform: {} });
+
 export const installConfigSchema = z.object({
   name: z.string().min(1),
   timezone: z.string().optional(),
@@ -124,7 +150,8 @@ export const installConfigSchema = z.object({
   platforms: z.record(z.string(), platformSchema),
   dependents: z.record(z.string(), dependentSchema),
   venues: z.record(z.string(), venueSchema),
-  routingRules: z.array(routingRuleSchema)
+  routingRules: z.array(routingRuleSchema),
+  notificationFilters: notificationFiltersSchema.optional()
 });
 
 export type InstallConfig = z.infer<typeof installConfigSchema>;

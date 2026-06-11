@@ -4,6 +4,10 @@
 
 ### Added
 
+- **Telegram notification filters** — per-platform allow/denylist, severity
+  floor, silence surfacing in dashboard and KV. See
+  [`docs/notification-filters.md`](docs/notification-filters.md).
+
 - **Build identity vars in example config** (`apps/worker/wrangler.toml.example`):
   `PSM_VERSION`, `PSM_BUILD_NUMBER`, and `PSM_GIT_SHA` vars added to the
   example config. Exposed via `/api/health` and the dashboard footer. Set these

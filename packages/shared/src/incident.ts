@@ -1,9 +1,14 @@
 import type { z } from "zod";
 import type { severitySchema, statusSchema } from "./config-schema";
+import type { SilenceReason } from "./notification-filter";
 
 export type IncidentSeverity = z.infer<typeof severitySchema>;
 export type IncidentStatus = z.infer<typeof statusSchema>;
 export type IncidentSource = "rss" | "webhook" | "synthetic";
+
+export interface IncidentNotificationStatus {
+  telegram: { silenced: boolean; reason?: SilenceReason } | null;
+}
 
 export interface Incident {
   id: string;
@@ -24,6 +29,13 @@ export interface Incident {
   lastSeenAt?: string;
   lastChangedAt?: string;
   providerStatus?: "active" | "resolved" | "unknown";
+  /**
+   * Presentational metadata attached by the API response handler — describes
+   * which notification channels silenced this incident (e.g. Telegram filter
+   * rules). Not produced by ingestion; not persisted in the snapshot. Used by
+   * the dashboard to render a 🔕 badge.
+   */
+  silenced?: IncidentNotificationStatus;
   raw: unknown;
 }
 
