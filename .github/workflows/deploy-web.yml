@@ -42,11 +42,32 @@ jobs:
           echo "build_number=$(git rev-list --count HEAD)" >> "$GITHUB_OUTPUT"
           echo "git_sha=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
 
+      # Guardrail: NEXT_PUBLIC_* values are baked at build time. If the worker
+      # URL is missing here, the dashboard ships with the `http://localhost:8787`
+      # fallback from apps/web/src/lib/api.ts and every browser fetch fails in
+      # prod. Fail loudly instead of shipping a broken bundle.
+      - name: Verify required build-time env vars
+        env:
+          NEXT_PUBLIC_WORKER_BASE_URL: ${{ vars.NEXT_PUBLIC_WORKER_BASE_URL }}
+        run: |
+          if [ -z "${NEXT_PUBLIC_WORKER_BASE_URL:-}" ]; then
+            echo "::error::NEXT_PUBLIC_WORKER_BASE_URL is not set (repo variable). Refusing to build — would bake localhost:8787 into the production bundle." >&2
+            exit 1
+          fi
+          case "$NEXT_PUBLIC_WORKER_BASE_URL" in
+            http://localhost*|http://127.0.0.1*)
+              echo "::error::NEXT_PUBLIC_WORKER_BASE_URL points to localhost ($NEXT_PUBLIC_WORKER_BASE_URL). Refusing to build." >&2
+              exit 1
+              ;;
+          esac
+          echo "NEXT_PUBLIC_WORKER_BASE_URL=$NEXT_PUBLIC_WORKER_BASE_URL"
+
       - name: Build web
         run: pnpm --filter @platform-status-monitor/web build
         env:
           NEXT_PUBLIC_BUILD_NUMBER: ${{ steps.build_id.outputs.build_number }}
           NEXT_PUBLIC_GIT_SHA: ${{ steps.build_id.outputs.git_sha }}
+          NEXT_PUBLIC_WORKER_BASE_URL: ${{ vars.NEXT_PUBLIC_WORKER_BASE_URL }}
 
       # wrangler-action tries `pnpm add wrangler` at workspace root, which
       # pnpm refuses without -w. Install wrangler globally via npm instead
