@@ -62,10 +62,16 @@ function isWithinWindow(minutes: number, start: number, end: number): boolean {
   return minutes >= start || minutes < end;
 }
 
-function isDependentActive(dependent: InstallConfig["dependents"][string], now: Date): boolean {
+export function isDependentActive(dependent: InstallConfig["dependents"][string], now: Date): boolean {
   if (!dependent.activeHours) return true;
   const minutes = localMinutes(now, dependent.timezone);
   return isWithinWindow(minutes, minutesFromTime(dependent.activeHours.start), minutesFromTime(dependent.activeHours.end));
+}
+
+export function getMatchedDependents(config: InstallConfig, incident: Incident): string[] {
+  return Object.keys(config.dependents).filter(
+    (dependentId) => dependentMatchesIncident(config, dependentId, incident).length > 0,
+  );
 }
 
 export function routeIncident(config: InstallConfig, incident: Incident, options: RouteIncidentOptions = {}): RoutingDecision {
