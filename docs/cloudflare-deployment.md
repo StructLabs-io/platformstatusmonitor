@@ -86,6 +86,31 @@ For private installs, put the Pages domain behind Cloudflare Access:
 4. Keep provider webhook endpoints separate from protected human dashboard
    routes if external providers need to call them.
 
+## Scripted Deploy
+
+`scripts/deploy.sh` wraps the build + Wrangler + smoke-test flow for both apps.
+It reads all operator-specific values from environment variables, with
+`scripts/deploy.env` (gitignored) and `<repo>/.env` as fallbacks.
+
+```bash
+cp scripts/deploy.env.example scripts/deploy.env
+# Fill in CLOUDFLARE_API_TOKEN, PSM_WORKER_URL, PSM_PAGES_URL, PSM_PAGES_PROJECT_NAME
+./scripts/deploy.sh worker        # deploy Worker only
+./scripts/deploy.sh web           # build + deploy Pages
+./scripts/deploy.sh all           # worker, then web
+./scripts/deploy.sh worker --dry-run   # print resolved config + commands, run nothing
+```
+
+Required variables:
+
+- `CLOUDFLARE_API_TOKEN` — Cloudflare API token with Pages + Workers + KV scope.
+- `PSM_WORKER_URL` — public URL of the deployed Worker. Baked into the Next.js
+  bundle as `NEXT_PUBLIC_WORKER_BASE_URL` and used by smoke tests.
+- `PSM_PAGES_URL` — public URL of the deployed Pages site (smoke tests).
+- `PSM_PAGES_PROJECT_NAME` — Cloudflare Pages project name.
+
+Optional: `PSM_DEPLOY_BRANCH` (defaults to `main`).
+
 ## Release Checklist
 
 Before release:

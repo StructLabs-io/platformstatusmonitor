@@ -9,5 +9,7 @@ dist/
 .env.*
 !.env.example
 !.dev.vars.example
+scripts/deploy.env
+!scripts/deploy.env.example
 .DS_Store
 
