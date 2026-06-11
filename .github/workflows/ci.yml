@@ -1,0 +1,41 @@
+name: CI
+
+# Mirrors the CI workflow used in the private deployment repo
+# (StructLabs-io/n9c-platformstatusmonitor) for parity. This public
+# version runs lint, tests, schema validation, build, and a secret scan
+# on every push to main and on pull requests. The private repo additionally
+# runs a deploy-worker job that ships the Cloudflare Worker on push to
+# main — that is intentionally omitted here because the worker target is
+# operator-specific.
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@08eba0b27e820071cde6df949e0beb9ba4906955
+      - uses: pnpm/action-setup@7088e561eb65bb68695d245aa206f005ef30921d
+        with:
+          version: 11.1.2
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm check
+      - run: pnpm test
+      - run: pnpm validate:config
+      - run: pnpm build
+      - name: Secret scan
+        run: docker run --rm -v "$PWD:/repo" zricethezav/gitleaks@sha256:691af3c7c5a48b16f187ce3446d5f194838f91238f27270ed36eef6359a574d9 detect --source=/repo --no-git --config=/repo/.gitleaks.toml --verbose
