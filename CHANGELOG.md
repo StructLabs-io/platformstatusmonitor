@@ -4,9 +4,13 @@
 
 ### Added
 
-- **Telegram notification filters** — per-platform allow/denylist, severity
-  floor, silence surfacing in dashboard and KV. See
-  [`docs/notification-filters.md`](docs/notification-filters.md).
+- **Telegram notification filter module** — per-platform allow/denylist,
+  severity floor, dashboard silence badges. **Note: this release ships the
+  filter module and config schema only; `apps/worker/src/index.ts` does not
+  yet invoke `notifyTelegram`. Operators forking this template must wire it
+  into their `scheduled` handler.** See
+  [`docs/notification-filters.md`](docs/notification-filters.md) for the
+  wiring snippet and known behavior around silence-marker TTL.
 
 - **Build identity vars in example config** (`apps/worker/wrangler.toml.example`):
   `PSM_VERSION`, `PSM_BUILD_NUMBER`, and `PSM_GIT_SHA` vars added to the

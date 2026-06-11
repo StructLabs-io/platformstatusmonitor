@@ -1,5 +1,21 @@
 # Telegram Notification Filters
 
+> **Wiring required**
+>
+> This release ships the filter module (`apps/worker/src/notifiers/telegram.ts`), the `notificationFilters` config schema, and the dashboard silence-badge surfacing — **but `apps/worker/src/index.ts` in this public template does not yet invoke `notifyTelegram`**. The module is reachable as an import; it is not called from the scheduled handler.
+>
+> Operators forking this template who want filtered Telegram alerts must wire it themselves. In your `scheduled` handler, after incidents are computed for the tick, add:
+>
+> ```ts
+> import { notifyTelegram } from "./notifiers/telegram";
+> // ...inside scheduled(), after you have the incidents array:
+> await notifyTelegram(ctx, env, incidents);
+> ```
+>
+> The internal StructLabs deployment wires this in its private worker; that wiring was intentionally kept out of this PR to avoid pulling in unrelated worker changes (KV-write cascade fix, parallel polling, ingestion-status writes) that diverge from the public template's shape. Configuring `notificationFilters` without wiring `notifyTelegram` will produce zero Telegram notifications and emit no warning — the filter block is read only when the notifier runs.
+>
+> **Known behavior — silence markers persist.** The `tg:silenced:*` KV markers that drive dashboard silence badges have a 30-day TTL and are not cleared when an operator un-silences a platform via `config/install.json`. To clear stale badges immediately, either re-tick the notifier once with the platform un-silenced, or manually purge the `tg:silenced:` KV prefix.
+
 Telegram is the only channel that gets gated by this filter layer. The dashboard always displays every incident the providers emit — filtering happens only at the notifier boundary.
 
 ## Why
