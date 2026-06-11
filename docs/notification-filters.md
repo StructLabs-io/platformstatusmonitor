@@ -4,13 +4,19 @@
 >
 > This release ships the filter module (`apps/worker/src/notifiers/telegram.ts`), the `notificationFilters` config schema, and the dashboard silence-badge surfacing — **but `apps/worker/src/index.ts` in this public template does not yet invoke `notifyTelegram`**. The module is reachable as an import; it is not called from the scheduled handler.
 >
-> Operators forking this template who want filtered Telegram alerts must wire it themselves. In your `scheduled` handler, after incidents are computed for the tick, add:
+> Operators forking this template who want filtered Telegram alerts must wire it themselves. The public `apps/worker/src/index.ts` already imports and validates the install config at module scope as `bundledConfig` (defined near the top of the file from `installConfig as InstallConfig`), so the wiring inside your `scheduled` handler — after incidents are computed for the tick — is:
 >
 > ```ts
 > import { notifyTelegram } from "./notifiers/telegram";
-> // ...inside scheduled(), after you have the incidents array:
-> await notifyTelegram(ctx, env, incidents);
+> // bundledConfig is already defined at module scope in index.ts:
+> //   import installConfig from "../../../config/install.json";
+> //   const bundledConfig = installConfig as InstallConfig;
+> // inside scheduled(), after incidents are computed:
+> const checkedAt = new Date().toISOString();
+> await notifyTelegram(env, bundledConfig, incidents, checkedAt);
 > ```
+>
+> The exported signature is `notifyTelegram(env, config, incidents, checkedAt)` — four positional arguments, all required, no `ctx`. `config` is what the filter layer reads `notificationFilters` from; omitting it or passing the wrong shape disables the entire feature.
 >
 > The internal StructLabs deployment wires this in its private worker; that wiring was intentionally kept out of this PR to avoid pulling in unrelated worker changes (KV-write cascade fix, parallel polling, ingestion-status writes) that diverge from the public template's shape. Configuring `notificationFilters` without wiring `notifyTelegram` will produce zero Telegram notifications and emit no warning — the filter block is read only when the notifier runs.
 >
