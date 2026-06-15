@@ -1,7 +1,7 @@
 {
   "name": "platform-status-monitor",
   "private": true,
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Agent-configurable platform status monitoring for teams and client operators.",
   "license": "MIT",
   "packageManager": "pnpm@11.1.2",
@@ -17,9 +17,9 @@
     "validate:config": "pnpm --filter @platform-status-monitor/shared validate:config"
   },
   "devDependencies": {
-    "@types/node": "^24.10.1",
-    "prettier": "^3.7.4",
-    "turbo": "^2.9.15",
+    "@types/node": "^25.9.3",
+    "prettier": "^3.8.4",
+    "turbo": "^2.9.18",
     "typescript": "^6.0.3"
   },
   "pnpm": {

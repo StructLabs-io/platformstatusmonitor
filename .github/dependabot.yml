@@ -1,0 +1,61 @@
+version: 2
+updates:
+  # Root workspace (turbo, prettier, typescript, @types/node)
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      patch-minor:
+        update-types:
+          - patch
+          - minor
+
+  # packages/shared (zod, tsx, vitest, @types/node)
+  - package-ecosystem: npm
+    directory: /packages/shared
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      patch-minor:
+        update-types:
+          - patch
+          - minor
+
+  # apps/web (next, react, tailwind, radix, lucide, vitest)
+  - package-ecosystem: npm
+    directory: /apps/web
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      patch-minor:
+        update-types:
+          - patch
+          - minor
+
+  # apps/worker (wrangler, @cloudflare/workers-types, vitest)
+  - package-ecosystem: npm
+    directory: /apps/worker
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      patch-minor:
+        update-types:
+          - patch
+          - minor
+
+  # GitHub Actions
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      patch-minor:
+        update-types:
+          - patch
+          - minor
