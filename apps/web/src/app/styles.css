@@ -589,20 +589,18 @@ select {
 }
 
 .notice {
-  border-left: 3px solid var(--ok-edge);
+  border-color: color-mix(in srgb, var(--ok-edge) 50%, var(--line));
 }
 
 .bad-notice {
   background: var(--bad-soft);
-  border-color: color-mix(in srgb, var(--bad-edge) 35%, var(--line));
-  border-left-color: var(--bad-edge);
+  border-color: color-mix(in srgb, var(--bad-edge) 60%, var(--line));
 }
 
 .impact-banner {
   align-items: start;
   background: var(--warn-soft);
-  border-color: color-mix(in srgb, var(--warn-edge) 35%, var(--line));
-  border-left: 3px solid var(--warn-edge);
+  border-color: color-mix(in srgb, var(--warn-edge) 60%, var(--line));
   display: flex;
   gap: 10px;
 }
@@ -675,9 +673,8 @@ select {
   color: var(--ink);
   flex: 0 0 auto;
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 600;
   line-height: 18px;
-  text-transform: uppercase;
 }
 
 .tier-heading p {
@@ -740,29 +737,11 @@ select {
 }
 
 .platform-card.warn {
-  border-color: color-mix(in srgb, var(--warn-edge) 40%, var(--line));
+  border-color: color-mix(in srgb, var(--warn-edge) 65%, var(--line));
 }
 
 .platform-card.bad {
-  border-color: color-mix(in srgb, var(--bad-edge) 40%, var(--line));
-}
-
-.platform-card.warn::before,
-.platform-card.bad::before {
-  bottom: 0;
-  content: "";
-  left: 0;
-  position: absolute;
-  top: 0;
-  width: 2px;
-}
-
-.platform-card.warn::before {
-  background: var(--warn-edge);
-}
-
-.platform-card.bad::before {
-  background: var(--bad-edge);
+  border-color: color-mix(in srgb, var(--bad-edge) 65%, var(--line));
 }
 
 .platform-card-main {
