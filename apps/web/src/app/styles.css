@@ -166,6 +166,9 @@
 
 html {
   background: var(--bg);
+  /* MIFB §8 — antialiased rendering on macOS, applied at root. */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -182,6 +185,14 @@ body {
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
   overflow-x: hidden;
+}
+
+/* MIFB §10 — short headings balance, paragraphs avoid orphans. */
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;
+}
+p {
+  text-wrap: pretty;
 }
 
 a {
@@ -346,8 +357,10 @@ nav {
   height: auto;
   justify-content: flex-start;
   line-height: 18px;
+  /* MIFB §16 — 40×40 minimum hit area for sidebar nav items. */
+  min-height: 40px;
   min-width: 0;
-  padding: 8px 10px;
+  padding: 11px 10px;
   text-decoration: none;
   transition:
     background 100ms var(--ease),
