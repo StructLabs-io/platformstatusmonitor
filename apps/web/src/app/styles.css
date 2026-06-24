@@ -740,13 +740,41 @@ select {
   overflow: hidden;
   padding: 13px 14px;
   position: relative;
+  /* Emil: hover should feel like physical lift, not just a colour shift. Adding
+   * box-shadow + a 1px Y nudge gives spatial feedback that the card is grabbable
+   * (it links out to the platform's status page). Properties named explicitly
+   * so unrelated style changes don't get tweened. */
   transition:
     border-color 150ms var(--ease),
-    background 150ms var(--ease);
+    background 150ms var(--ease),
+    box-shadow 150ms var(--ease),
+    transform 150ms var(--ease);
 }
 
 .platform-card:hover {
   border-color: var(--line-2);
+  box-shadow: 0 4px 12px rgba(16, 24, 40, 0.08);
+  transform: translateY(-1px);
+}
+
+/* Tap-feedback: card snaps back on press, sells the click before the navigation lands. */
+.platform-card:active {
+  transform: translateY(0);
+  transition-duration: 80ms;
+}
+
+/* Dark theme has no ambient shadow token, so use a soft glow that reads in dark. */
+:root[data-theme="dark"] .platform-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .platform-card,
+  .platform-card:hover,
+  .platform-card:active {
+    transform: none;
+    transition: border-color 150ms var(--ease), background 150ms var(--ease);
+  }
 }
 
 .platform-card.warn {
