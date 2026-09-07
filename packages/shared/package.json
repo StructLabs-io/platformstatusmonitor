@@ -13,11 +13,11 @@
     "export:schema": "tsx src/schema-export-cli.ts ../../config/install.schema.json"
   },
   "dependencies": {
-    "zod": "^4.4.3"
+    "zod": "^4.5.4"
   },
   "devDependencies": {
     "@types/node": "^25.9.3",
-    "tsx": "^4.22.4",
+    "tsx": "^4.23.13",
     "typescript": "^6.0.3",
     "vitest": "^4.1.8"
   }
